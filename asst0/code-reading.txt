@@ -1,0 +1,153 @@
+Question 1. Which register number is used for the stack pointer (sp) in OS/161?
+            #29
+            kern/arch/mips/include/asmdefs.h
+
+Question 2. What bus/busses does OS/161 support?
+            only LAMEbus
+            kern/arch/mips/include/bus.h
+
+Question 3. What is the difference between splhigh and spl0?
+            splhigh means sets spl to the highest value, disabling all interrupts.
+            spl0 means sets spl to 0, enabling all interrupts.
+            kern/arch/mips/include/spl.h
+
+Question 4. Why do we use typedefs like u_int32_t instead of simply saying "int"? 
+            The typedef allows us to alter the actual native type such a type name refers to in a single location without having to update it everywhere it is used. The C standard does not define a fixed size for the type int. Different environments/platforms have different values for sizeof(int). All we have to change is the header which contains the particular typedef in order to have u_int32_t refer to an actual unsigned 32-bit type. On some systems this might be unsigned int, on others it might be unsigned long.
+            kern/arch/mips/include/types.h
+
+Question 5. What does splx return?
+            splx returns the old spl level
+            kern/arch/mips/mips/spl.c
+
+Question 6. What is the highest interrupt level?
+            spl high. Integer spl level is traditionally 15
+            kern/arch/mips/include/spl.h
+
+Question 7. How frequently are hardclock interrupts generated?
+            10000 or 100
+            kern/include/clock.h
+
+Question 8. What functions comprise the standard interface to a VFS device?
+            int vfs_open(char *path, int openflags, struct vnode **ret);
+            void vfs_close(struct vnode *vn);
+            int vfs_readlink(char *path, struct uio *data);
+            int vfs_symlink(const char *contents, char *path);
+            int vfs_mkdir(char *path);
+            int vfs_link(char *oldpath, char *newpath);
+            int vfs_remove(char *path);
+            int vfs_rmdir(char *path);
+            int vfs_rename(char *oldpath, char *newpath);
+            int vfs_chdir(char *path);
+            int vfs_getcwd(struct uio *buf);
+            kern/include/vfs.h
+Question 9. How many characters are allowed in a volume name?
+            32
+            kern/include/kern/sfs.h
+
+Question 10. How many direct blocks does an SFS file have?
+             15
+             kern/include/kern/sfs.h
+Question 11. What is the standard interface to a file system (i.e., what functions must you implement to implement a new file system)?
+             int           (*fs_sync)(struct fs *);
+	     const char   *(*fs_getvolname)(struct fs *);
+	     struct vnode *(*fs_getroot)(struct fs *);
+	     int           (*fs_unmount)(struct fs *);
+             kern/include/fs.h
+
+Question 12. What function puts a thread to sleep?
+             void thread_sleep(const void *addr)
+             kern/include/thread.h
+              
+Question 13. How large are OS/161 pids?
+             int32_t
+             kern/include/kern/types.h
+
+Question 14. What operations can you do on a vnode?
+        int (*vop_open)(struct vnode *object, int flags_from_open);
+	int (*vop_close)(struct vnode *object);
+	int (*vop_reclaim)(struct vnode *vnode);
+
+
+	int (*vop_read)(struct vnode *file, struct uio *uio);
+	int (*vop_readlink)(struct vnode *link, struct uio *uio);
+	int (*vop_getdirentry)(struct vnode *dir, struct uio *uio);
+	int (*vop_write)(struct vnode *file, struct uio *uio);
+	int (*vop_ioctl)(struct vnode *object, int op, userptr_t data);
+	int (*vop_stat)(struct vnode *object, struct stat *statbuf);
+	int (*vop_gettype)(struct vnode *object, u_int32_t *result);
+	int (*vop_tryseek)(struct vnode *object, off_t pos);
+	int (*vop_fsync)(struct vnode *object);
+	int (*vop_mmap)(struct vnode *file /* add stuff */);
+	int (*vop_truncate)(struct vnode *file, off_t len);
+	int (*vop_namefile)(struct vnode *file, struct uio *uio);
+
+
+	int (*vop_creat)(struct vnode *dir, 
+			 const char *name, int excl,
+			 struct vnode **result);
+	int (*vop_symlink)(struct vnode *dir, 
+			   const char *contents, const char *name);
+	int (*vop_mkdir)(struct vnode *parentdir, 
+			 const char *name);
+	int (*vop_link)(struct vnode *dir, 
+			const char *name, struct vnode *file);
+	int (*vop_remove)(struct vnode *dir, 
+			  const char *name);
+	int (*vop_rmdir)(struct vnode *dir,
+			 const char *name);
+
+	int (*vop_rename)(struct vnode *vn1, const char *name1, 
+			  struct vnode *vn2, const char *name2);
+
+	
+	int (*vop_lookup)(struct vnode *dir, 
+			  char *pathname, struct vnode **result);
+	int (*vop_lookparent)(struct vnode *dir,
+			      char *pathname, struct vnode **result,
+			      char *buf, size_t len);
+             kern/include/vnode.h
+
+Question 15. What is the maximum path length in OS/161?
+             1024  
+             src/kern/include/kern/limits.h
+  
+Question 16. What is the system call number for a reboot?
+             8
+             src/kern/include/kern/callno.h
+
+Question 17. Where is STDIN_FILENO defined? 
+             src/kern/include/kern/unistd.h
+
+Question 18 Is it OK to initialize the thread system before the scheduler? Why (not)?
+            NO,the scheduler must be initialized first because thread_bootstrap      already calls thread_create which requires an initialized scheduler. 
+
+Question 19. What is a zombie?
+             Zombies are threads/processes that have exited but not been fully
+             deleted yet.
+             src/kern/thread/thread.c
+
+Question 20. How large is the initial run queue? 
+             32
+             kern/thread/scheduler.c
+
+Question 21. What does a device pathname in OS/161 look like?
+             One interesting feature of device:name pathname syntax is that you can
+             implement pathnames on arbitrary devices. For instance, if you had a
+             serial port that actually let you control the RS232 settings (unlike
+             the LAMEbus serial port), you might arrange things so that you could
+             open it with pathnames like "ser:9600/n/8/1" in order to select the
+             operating mode.
+             kern/fs/vfs/device.c
+
+Question 22. What does a raw device name in OS/161 look like?
+             lhd0raw
+             kern/fs/vfs/vfslist.c
+
+Question 23. What lock protects the vnode reference count?
+             vn_countlock
+             kern/fs/vfs/vnode.c
+
+Question 24. What device types are currently supported? 
+             Block & character devices
+             kern/fs/vfs/device.c
+
